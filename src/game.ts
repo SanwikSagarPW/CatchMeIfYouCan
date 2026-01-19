@@ -49,7 +49,7 @@ export default class CatchTheCatGame extends Phaser.Game {
             scene: [homeScene, howToPlayScene, scene],
             scale: {
                 mode: 1, // FIT
-                autoCenter: 2, // CENTER_BOTH
+                autoCenter: 0, // NO_CENTER
                 width: canvasWidth,
                 height: canvasHeight
             },

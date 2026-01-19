@@ -2,5 +2,14 @@
   "compilerOptions": {
     "target": "ES5",
     "module": "CommonJs"
-  }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "phaser.min.js",
+    "*.min.js",
+    "dist"
+  ]
 }
