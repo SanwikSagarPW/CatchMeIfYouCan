@@ -180,6 +180,38 @@ export default class MainScene extends Phaser.Scene {
         window.addEventListener('resize', () => {
             this.scale.refresh();
         });
+
+        // --- ROBUST INPUT FIX ---
+        // Global pointer listener to manually find closest block.
+        // This overrides individual hit areas which may be misaligned due to CSS scaling or DPI issues.
+        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            // Validate pointer is within game bounds roughly
+            if (pointer.x < 0 || pointer.y < 0 || pointer.x > this.scale.width || pointer.y > this.scale.height) return;
+
+            let closestBlock: Block | null = null;
+            // Allow clicking slightly outside the visual circle (radius * 1.3) for better touch feel
+            let minDistance = this.r * 1.3; 
+
+            // Iterate all blocks to find the closest one to the click
+            for (let i = 0; i < this.w; i++) {
+                for (let j = 0; j < this.h; j++) {
+                    let block = this.blocks[i][j];
+                    if (!block) continue;
+                    
+                    // Compare pointer World Coordinates to Block Visual Coordinates
+                    let dist = Phaser.Math.Distance.Between(pointer.worldX, pointer.worldY, block.x, block.y);
+                    
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        closestBlock = block;
+                    }
+                }
+            }
+
+            if (closestBlock) {
+               this.playerClick(closestBlock.i, closestBlock.j);
+            }
+        });
     }
 
     // --- Game Logic ---
@@ -316,7 +348,8 @@ export default class MainScene extends Phaser.Scene {
                 let block = new Block(this, i, j, this.r * 0.9);
                 blocks[i][j] = block;
                 this.add.existing(block);
-                block.on("player_click", this.playerClick.bind(this));
+                // Input is now handled by the global scene listener for better robustness
+                // block.on("player_click", this.playerClick.bind(this));
             }
         }
         this.blocks = blocks;
