@@ -90,19 +90,23 @@ style.innerHTML = `
         border-radius: 16px;
         overflow: hidden;
         width: 100%;
-        display: flex;
-        justify-content: center;
+        display: block; /* Changed from flex to block to avoid offset calculation issues */
         margin-bottom: 24px;
-        position: relative; /* Ensure relative positioning for input calculation */
+        position: relative;
         /* Subtle border to frame the grid */
         border: 2px solid #dfe6e9;
+        /* Enforce Aspect Ratio wrapper if needed, but let's stick to simple block for now */
+        line-height: 0; /* Remove gap below canvas */
     }
     
     #phaser-game canvas {
         display: block;
-        touch-action: none; /* Prevent browser scrolling dragging on the canvas */
+        margin: 0 auto; /* CSS Centering backup */
+        touch-action: none;
         user-select: none;
         -webkit-user-select: none;
+        max-width: 100%; /* Ensure it never overflows width */
+        height: auto; /* Maintain aspect ratio */
     }
 
     /* Buttons */
