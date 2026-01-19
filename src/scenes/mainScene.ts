@@ -156,6 +156,9 @@ export default class MainScene extends Phaser.Scene {
             window['toggleGameUI'](true);
         }
         
+        // Ensure input manager knows about the bounding box
+        this.input.manager.updateBounds();
+
         this.reset();
         
         if (this.game.solver) {

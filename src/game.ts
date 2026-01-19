@@ -53,8 +53,10 @@ export default class CatchTheCatGame extends Phaser.Game {
                 width: canvasWidth,
                 height: canvasHeight
             },
+            resolution: 1, // Force 1:1 pixel ratio to prevent input offsets on high-DPI devices
             input: {
-                activePointers: 1
+                activePointers: 1,
+                windowEvents: false // Prevent global window events from interfering
             }
         };
 
