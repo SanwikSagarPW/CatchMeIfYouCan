@@ -167,6 +167,11 @@ export default class MainScene extends Phaser.Scene {
         
         // Fade in effect
         this.cameras.main.fadeIn(300, 0, 0, 0);
+
+        // Update canvas bounds to fix input offset caused by CSS layout
+        this.time.delayedCall(250, () => {
+             this.scale.refresh();
+        });
     }
 
     // --- Game Logic ---
