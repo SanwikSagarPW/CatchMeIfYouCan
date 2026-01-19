@@ -93,12 +93,16 @@ style.innerHTML = `
         display: flex;
         justify-content: center;
         margin-bottom: 24px;
+        position: relative; /* Ensure relative positioning for input calculation */
         /* Subtle border to frame the grid */
         border: 2px solid #dfe6e9;
     }
     
     #phaser-game canvas {
         display: block;
+        touch-action: none; /* Prevent browser scrolling dragging on the canvas */
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     /* Buttons */

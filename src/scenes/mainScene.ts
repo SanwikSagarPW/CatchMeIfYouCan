@@ -172,6 +172,11 @@ export default class MainScene extends Phaser.Scene {
         this.time.delayedCall(250, () => {
              this.scale.refresh();
         });
+
+        // Add resize listener to handle device rotation or window resizing
+        window.addEventListener('resize', () => {
+            this.scale.refresh();
+        });
     }
 
     // --- Game Logic ---
