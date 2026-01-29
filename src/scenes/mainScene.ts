@@ -161,9 +161,7 @@ export default class MainScene extends Phaser.Scene {
 
         this.reset();
         
-        if (this.game.solver) {
-            this.cat.solver = this.game.solver;
-        }
+        // Solver is set directly in createCat(), no need to check game.solver here
         
         // Play background music if it exists
         this.playBackgroundMusic();
@@ -171,22 +169,14 @@ export default class MainScene extends Phaser.Scene {
         // Fade in effect
         this.cameras.main.fadeIn(300, 0, 0, 0);
 
-        // Update canvas bounds to fix input offset caused by CSS layout
-        this.time.delayedCall(250, () => {
-             this.scale.refresh();
-        });
-
-        // Add resize listener to handle device rotation or window resizing
-        window.addEventListener('resize', () => {
-            this.scale.refresh();
-        });
-
         // --- ROBUST INPUT FIX ---
         // Global pointer listener to manually find closest block.
         // This overrides individual hit areas which may be misaligned due to CSS scaling or DPI issues.
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             // Validate pointer is within game bounds roughly
-            if (pointer.x < 0 || pointer.y < 0 || pointer.x > this.scale.width || pointer.y > this.scale.height) return;
+            const gameWidth = this.cameras.main.width;
+            const gameHeight = this.cameras.main.height;
+            if (pointer.x < 0 || pointer.y < 0 || pointer.x > gameWidth || pointer.y > gameHeight) return;
 
             let closestBlock: Block | null = null;
             // Allow clicking slightly outside the visual circle (radius * 1.3) for better touch feel

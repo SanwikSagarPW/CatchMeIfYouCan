@@ -1,5 +1,5 @@
-// --- FILE: game.ts ---
-
+// --- FILE: src/game.ts ---
+import "phaser";
 import MainScene from "./scenes/mainScene";
 import HomeScene from "./scenes/homeScene";
 import HowToPlayScene from "./scenes/howToPlayScene";
@@ -28,53 +28,35 @@ export default class CatchTheCatGame extends Phaser.Game {
         let h = config.h;
         let r = config.r;
         
-        // --- CANVAS CALCULATIONS ---
-        // Width: (6.5 hexes padding) + (2 * width)
+        // Calculate canvas dimensions based on hex grid math
         let canvasWidth = Math.floor((6.5 + 2 * w) * r);
-        
-        // Height: Reduced padding from original since UI is now HTML
-        // (5 hexes padding) + (sqrt(3) * height)
         let canvasHeight = Math.floor((5 + Math.sqrt(3) * h) * r);
 
-        let scene = new MainScene(w, h, r, config.initialWallCount);
-        let homeScene = new HomeScene();
-        let howToPlayScene = new HowToPlayScene();
+        // Instantiate scene objects
+        const mainSceneInstance = new MainScene(w, h, r, config.initialWallCount);
+        const homeSceneInstance = new HomeScene();
+        const howToPlaySceneInstance = new HowToPlayScene();
         
-        const gameConfig: any = {
+        // Use 'any' for the config object to bypass the "Namespace Phaser.Types has no member" error
+        const phaserConfig: any = {
             width: canvasWidth,
             height: canvasHeight,
             type: Phaser.AUTO,
             parent: config.parent,
             backgroundColor: config.backgroundColor,
-            scene: [homeScene, howToPlayScene, scene],
+            // HomeScene must be index 0 to load first
+            scene: [homeSceneInstance, howToPlaySceneInstance, mainSceneInstance],
             scale: {
-                mode: 1, // FIT
-                autoCenter: 1, // CENTER_HORIZONTALLY - Let Phaser handle horizontal centering
-                width: canvasWidth,
-                height: canvasHeight
+                mode: 3, // Corresponds to Phaser.Scale.FIT
+                autoCenter: 1, // Corresponds to Phaser.Scale.CENTER_BOTH or HORIZONTALLY
             },
-            resolution: 1, // Force 1:1 pixel ratio
             input: {
                 activePointers: 1,
             }
         };
 
-        super(gameConfig);
+        super(phaserConfig);
         this.myConfig = config;
-        this.mainScene = scene;
-    }
-
-    private _solver;
-
-    get solver() {
-        return this._solver;
-    }
-
-    set solver(value) {
-        this._solver = value;
-        try {
-            this.mainScene.cat.solver = value;
-        } finally {
-        }
+        this.mainScene = mainSceneInstance;
     }
 }
