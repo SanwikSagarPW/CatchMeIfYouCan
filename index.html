@@ -10,31 +10,444 @@
         }
 
         body {
-            background-color: #eeeeee;
+            background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
 
         #catch-the-cat {
             width: 100%;
-            margin-top: 32px;
             text-align: center;
+        }
+        
+        #catch-the-cat canvas {
+            margin: 0 auto;
+            display: block;
         }
     </style>
 </head>
 <body>
-    <script src="phaser.min.js"></script>
-    <script src="catch-the-cat.js"></script>
     <div id="catch-the-cat"></div>
+    
+    <script src="phaser.min.js"></script>
+    <!-- Load catch-the-cat.js AFTER we create our scenes -->
     <script>
-      window.game = new CatchTheCatGame({
-        w: 11,
-        h: 11,
-        r: 20,
-        initialWallCount: 8,
-        backgroundColor: 0xffffff,
+      // HomeScene - Menu screen
+      class HomeScene extends Phaser.Scene {
+          constructor() {
+              super({ key: 'HomeScene' });
+          }
+
+          create() {
+              const { width, height } = this.cameras.main;
+              
+              // Background particles
+              for (let i = 0; i < 15; i++) {
+                  const particle = this.add.graphics();
+                  particle.fillStyle(0x6c5ce7, 0.1);
+                  particle.fillCircle(0, 0, Math.random() * 20 + 5);
+                  particle.setPosition(Math.random() * width, Math.random() * height);
+                  
+                  this.tweens.add({
+                      targets: particle,
+                      y: particle.y + (Math.random() * 100 - 50),
+                      x: particle.x + (Math.random() * 100 - 50),
+                      alpha: Math.random() * 0.3 + 0.1,
+                      duration: Math.random() * 3000 + 2000,
+                      yoyo: true,
+                      repeat: -1,
+                      ease: 'Sine.easeInOut'
+                  });
+              }
+              
+              // Title
+              const titleText = this.add.text(width / 2, height * 0.25, 'CATCH THE CAT', {
+                  fontFamily: 'Arial Black, sans-serif',
+                  fontSize: '48px',
+                  color: '#6c5ce7',
+                  stroke: '#ffffff',
+                  strokeThickness: 6,
+                  align: 'center',
+                  fontStyle: 'bold'
+              });
+              titleText.setOrigin(0.5);
+              
+              this.tweens.add({
+                  targets: titleText,
+                  scale: { from: 1, to: 1.05 },
+                  duration: 1500,
+                  yoyo: true,
+                  repeat: -1,
+                  ease: 'Sine.easeInOut'
+              });
+              
+              // Subtitle
+              const subtitle = this.add.text(width / 2, height * 0.32, 'Trap the Kitty Before It Escapes!', {
+                  fontFamily: 'Arial, sans-serif',
+                  fontSize: '18px',
+                  color: '#636e72',
+                  fontStyle: 'bold'
+              });
+              subtitle.setOrigin(0.5);
+              
+              this.tweens.add({
+                  targets: subtitle,
+                  alpha: { from: 0.7, to: 1 },
+                  duration: 2000,
+                  yoyo: true,
+                  repeat: -1,
+                  ease: 'Sine.easeInOut'
+              });
+              
+              // Cat emoji
+              const catEmoji = this.add.text(width / 2, height * 0.45, '🐱', {
+                  fontSize: '80px'
+              });
+              catEmoji.setOrigin(0.5);
+              
+              this.tweens.add({
+                  targets: catEmoji,
+                  y: height * 0.45 - 20,
+                  duration: 800,
+                  yoyo: true,
+                  repeat: -1,
+                  ease: 'Bounce.easeOut'
+              });
+              
+              this.tweens.add({
+                  targets: catEmoji,
+                  angle: { from: -10, to: 10 },
+                  duration: 1000,
+                  yoyo: true,
+                  repeat: -1,
+                  ease: 'Sine.easeInOut'
+              });
+              
+              // Play button
+              const buttonBg = this.add.graphics();
+              buttonBg.fillStyle(0x6c5ce7, 1);
+              buttonBg.fillRoundedRect(-100, -25, 200, 50, 25);
+              
+              const buttonText = this.add.text(0, 0, 'PLAY', {
+                  fontFamily: 'Arial Black, sans-serif',
+                  fontSize: '28px',
+                  color: '#ffffff',
+                  fontStyle: 'bold'
+              });
+              buttonText.setOrigin(0.5);
+              
+              const playButton = this.add.container(width / 2, height * 0.62, [buttonBg, buttonText]);
+              playButton.setSize(200, 50);
+              playButton.setInteractive(new Phaser.Geom.Rectangle(-100, -25, 200, 50), Phaser.Geom.Rectangle.Contains);
+              playButton.input.cursor = 'pointer';
+              
+              playButton.on('pointerover', () => {
+                  this.tweens.add({
+                      targets: playButton,
+                      scale: 1.1,
+                      duration: 200,
+                      ease: 'Back.easeOut'
+                  });
+                  buttonBg.clear();
+                  buttonBg.fillStyle(0x5849be, 1);
+                  buttonBg.fillRoundedRect(-100, -25, 200, 50, 25);
+              });
+              
+              playButton.on('pointerout', () => {
+                  this.tweens.add({
+                      targets: playButton,
+                      scale: 1,
+                      duration: 200,
+                      ease: 'Back.easeIn'
+                  });
+                  buttonBg.clear();
+                  buttonBg.fillStyle(0x6c5ce7, 1);
+                  buttonBg.fillRoundedRect(-100, -25, 200, 50, 25);
+              });
+              
+              playButton.on('pointerdown', () => {
+                  this.tweens.add({
+                      targets: playButton,
+                      scale: 0.95,
+                      duration: 100,
+                      yoyo: true,
+                      onComplete: () => {
+                          this.cameras.main.fadeOut(300, 0, 0, 0);
+                          this.time.delayedCall(300, () => {
+                              this.scene.stop('HomeScene');
+                              window.startMainGame();
+                          });
+                      }
+                  });
+              });
+              
+              this.tweens.add({
+                  targets: playButton,
+                  scale: { from: 1, to: 1.05 },
+                  duration: 1000,
+                  yoyo: true,
+                  repeat: -1,
+                  ease: 'Sine.easeInOut'
+              });
+              
+              // How to Play button
+              const howButtonBg = this.add.graphics();
+              howButtonBg.lineStyle(3, 0x6c5ce7, 1);
+              howButtonBg.strokeRoundedRect(-120, -22, 240, 44, 22);
+              
+              const howButtonText = this.add.text(0, 0, 'How to Play', {
+                  fontFamily: 'Arial, sans-serif',
+                  fontSize: '22px',
+                  color: '#6c5ce7',
+                  fontStyle: 'bold'
+              });
+              howButtonText.setOrigin(0.5);
+              
+              const howToPlayButton = this.add.container(width / 2, height * 0.74, [howButtonBg, howButtonText]);
+              howToPlayButton.setSize(240, 44);
+              howToPlayButton.setInteractive(new Phaser.Geom.Rectangle(-120, -22, 240, 44), Phaser.Geom.Rectangle.Contains);
+              howToPlayButton.input.cursor = 'pointer';
+              
+              howToPlayButton.on('pointerover', () => {
+                  this.tweens.add({
+                      targets: howToPlayButton,
+                      scale: 1.05,
+                      duration: 200,
+                      ease: 'Back.easeOut'
+                  });
+                  howButtonBg.clear();
+                  howButtonBg.fillStyle(0x6c5ce7, 0.1);
+                  howButtonBg.fillRoundedRect(-120, -22, 240, 44, 22);
+                  howButtonBg.lineStyle(3, 0x6c5ce7, 1);
+                  howButtonBg.strokeRoundedRect(-120, -22, 240, 44, 22);
+              });
+              
+              howToPlayButton.on('pointerout', () => {
+                  this.tweens.add({
+                      targets: howToPlayButton,
+                      scale: 1,
+                      duration: 200,
+                      ease: 'Back.easeIn'
+                  });
+                  howButtonBg.clear();
+                  howButtonBg.lineStyle(3, 0x6c5ce7, 1);
+                  howButtonBg.strokeRoundedRect(-120, -22, 240, 44, 22);
+              });
+              
+              howToPlayButton.on('pointerdown', () => {
+                  this.tweens.add({
+                      targets: howToPlayButton,
+                      scale: 0.95,
+                      duration: 100,
+                      yoyo: true,
+                      onComplete: () => {
+                          this.cameras.main.fadeOut(200, 0, 0, 0);
+                          this.time.delayedCall(200, () => {
+                              this.scene.start('HowToPlayScene');
+                          });
+                      }
+                  });
+              });
+              
+              // Footer
+              const footer = this.add.text(width / 2, height * 0.9, 'Strategy Puzzle Game', {
+                  fontFamily: 'Arial, sans-serif',
+                  fontSize: '14px',
+                  color: '#b2bec3',
+                  fontStyle: 'bold'
+              });
+              footer.setOrigin(0.5);
+          }
+      }
+
+      // HowToPlayScene - Instructions
+      class HowToPlayScene extends Phaser.Scene {
+          constructor() {
+              super({ key: 'HowToPlayScene' });
+          }
+
+          create() {
+              const { width, height } = this.cameras.main;
+              
+              const bg = this.add.graphics();
+              bg.fillStyle(0xffffff, 1);
+              bg.fillRect(0, 0, width, height);
+              
+              const title = this.add.text(width / 2, 50, 'How to Play', {
+                  fontFamily: 'Arial Black, sans-serif',
+                  fontSize: '42px',
+                  color: '#6c5ce7',
+                  fontStyle: 'bold'
+              });
+              title.setOrigin(0.5);
+              
+              const panelWidth = width * 0.85;
+              const panelHeight = height * 0.62;
+              const panelX = (width - panelWidth) / 2;
+              const panelY = height * 0.16;
+              
+              const panelBg = this.add.graphics();
+              panelBg.fillStyle(0xf8f9fa, 1);
+              panelBg.fillRoundedRect(panelX, panelY, panelWidth, panelHeight, 20);
+              panelBg.lineStyle(3, 0x6c5ce7, 0.3);
+              panelBg.strokeRoundedRect(panelX, panelY, panelWidth, panelHeight, 20);
+              
+              let yOffset = panelY + 30;
+              
+              // Objective
+              const obj = this.add.text(width / 2, yOffset, '🎯 Objective', {
+                  fontFamily: 'Arial Black, sans-serif',
+                  fontSize: '22px',
+                  color: '#6c5ce7',
+                  fontStyle: 'bold'
+              });
+              obj.setOrigin(0.5, 0);
+              yOffset += 40;
+              
+              const objText = this.add.text(width / 2, yOffset, 'Trap the cat before it escapes to the edge!', {
+                  fontFamily: 'Arial, sans-serif',
+                  fontSize: '17px',
+                  color: '#2d3436',
+                  align: 'center',
+                  wordWrap: { width: panelWidth * 0.85 }
+              });
+              objText.setOrigin(0.5, 0);
+              yOffset += objText.height + 25;
+              
+              // How to Play
+              const how = this.add.text(width / 2, yOffset, '🎮 How to Play', {
+                  fontFamily: 'Arial Black, sans-serif',
+                  fontSize: '22px',
+                  color: '#6c5ce7',
+                  fontStyle: 'bold'
+              });
+              how.setOrigin(0.5, 0);
+              yOffset += 40;
+              
+              const points = [
+                  'Click on empty dots to block the cat\'s path',
+                  'The cat moves after each of your clicks',
+                  'Surround the cat completely to win'
+              ];
+              
+              points.forEach(point => {
+                  const bullet = this.add.text(panelX + 40, yOffset, '•', {
+                      fontFamily: 'Arial, sans-serif',
+                      fontSize: '20px',
+                      color: '#6c5ce7',
+                      fontStyle: 'bold'
+                  });
+                  bullet.setOrigin(0, 0);
+                  
+                  const pointText = this.add.text(panelX + 65, yOffset, point, {
+                      fontFamily: 'Arial, sans-serif',
+                      fontSize: '16px',
+                      color: '#2d3436',
+                      wordWrap: { width: panelWidth - 90 }
+                  });
+                  pointText.setOrigin(0, 0);
+                  
+                  yOffset += Math.max(bullet.height, pointText.height) + 12;
+              });
+              
+              // Back button
+              const buttonBg = this.add.graphics();
+              buttonBg.fillStyle(0x6c5ce7, 1);
+              buttonBg.fillRoundedRect(-80, -22, 160, 44, 22);
+              
+              const buttonText = this.add.text(0, 0, '← Back', {
+                  fontFamily: 'Arial, sans-serif',
+                  fontSize: '20px',
+                  color: '#ffffff',
+                  fontStyle: 'bold'
+              });
+              buttonText.setOrigin(0.5);
+              
+              const backButton = this.add.container(width / 2, height * 0.88, [buttonBg, buttonText]);
+              backButton.setSize(160, 44);
+              backButton.setInteractive(new Phaser.Geom.Rectangle(-80, -22, 160, 44), Phaser.Geom.Rectangle.Contains);
+              backButton.input.cursor = 'pointer';
+              
+              backButton.on('pointerover', () => {
+                  this.tweens.add({
+                      targets: backButton,
+                      scale: 1.05,
+                      duration: 200,
+                      ease: 'Back.easeOut'
+                  });
+                  buttonBg.clear();
+                  buttonBg.fillStyle(0x5849be, 1);
+                  buttonBg.fillRoundedRect(-80, -22, 160, 44, 22);
+              });
+              
+              backButton.on('pointerout', () => {
+                  this.tweens.add({
+                      targets: backButton,
+                      scale: 1,
+                      duration: 200,
+                      ease: 'Back.easeIn'
+                  });
+                  buttonBg.clear();
+                  buttonBg.fillStyle(0x6c5ce7, 1);
+                  buttonBg.fillRoundedRect(-80, -22, 160, 44, 22);
+              });
+              
+              backButton.on('pointerdown', () => {
+                  this.tweens.add({
+                      targets: backButton,
+                      scale: 0.95,
+                      duration: 100,
+                      yoyo: true,
+                      onComplete: () => {
+                          this.cameras.main.fadeOut(200, 0, 0, 0);
+                          this.time.delayedCall(200, () => {
+                              this.scene.start('HomeScene');
+                          });
+                      }
+                  });
+              });
+              
+              this.cameras.main.fadeIn(200, 0, 0, 0);
+          }
+      }
+
+      // Create game with custom scene order
+      const config = {
+        width: Math.floor((6.5 + 2 * 11) * 20),
+        height: Math.floor((5 + Math.sqrt(3) * 11) * 20),
+        type: Phaser.AUTO,
         parent: 'catch-the-cat',
-        statusBarAlign: 'center',
-        credit: ''
-      });
+        backgroundColor: 0xffffff,
+        scene: [HomeScene, HowToPlayScene] // Start with HomeScene only
+      };
+      
+      window.game = new Phaser.Game(config);
+      
+      // Store MainScene constructor for later use
+      window.startMainGame = function() {
+          // Load catch-the-cat.js dynamically when Play is clicked
+          const script = document.createElement('script');
+          script.src = 'catch-the-cat.js';
+          script.onload = function() {
+              // Once loaded, destroy our menu game and create the real game
+              window.game.destroy(true);
+              
+              // Now create the actual game
+              window.game = new CatchTheCatGame({
+                  w: 11,
+                  h: 11,
+                  r: 20,
+                  initialWallCount: 8,
+                  backgroundColor: 0xffffff,
+                  parent: 'catch-the-cat',
+                  statusBarAlign: 'center',
+                  credit: ''
+              });
+          };
+          document.head.appendChild(script);
+      };
     </script>
 </body>
 </html>

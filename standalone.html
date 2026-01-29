@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch The Cat - Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    
+    <script>
+        // HomeScene - Main menu
+        class HomeScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'HomeScene' });
+            }
+
+            preload() {
+                // No assets to load in standalone version
+            }
+
+            create() {
+                const width = this.cameras.main.width;
+                const height = this.cameras.main.height;
+                
+                // Background particles
+                this.createBackgroundParticles();
+                
+                // Animated title
+                this.createTitle(width, height);
+                
+                // Cat animation
+                this.createCatAnimation(width, height);
+                
+                // Play button
+                this.createPlayButton(width, height);
+                
+                // How to Play button
+                this.createHowToPlayButton(width, height);
+                
+                // Footer
+                this.createFooter(width, height);
+            }
+
+            createBackgroundParticles() {
+                const width = this.cameras.main.width;
+                const height = this.cameras.main.height;
+                
+                for (let i = 0; i < 15; i++) {
+                    const particle = this.add.graphics();
+                    particle.fillStyle(0x6c5ce7, 0.1);
+                    particle.fillCircle(0, 0, Math.random() * 20 + 5);
+                    particle.setPosition(
+                        Math.random() * width,
+                        Math.random() * height
+                    );
+                    
+                    this.tweens.add({
+                        targets: particle,
+                        y: particle.y + (Math.random() * 100 - 50),
+                        x: particle.x + (Math.random() * 100 - 50),
+                        alpha: Math.random() * 0.3 + 0.1,
+                        duration: Math.random() * 3000 + 2000,
+                        yoyo: true,
+                        repeat: -1,
+                        ease: 'Sine.easeInOut'
+                    });
+                }
+            }
+
+            createTitle(width, height) {
+                const titleText = this.add.text(width / 2, height * 0.25, 'CATCH THE CAT', {
+                    fontFamily: 'Arial Black, sans-serif',
+                    fontSize: '48px',
+                    color: '#6c5ce7',
+                    stroke: '#ffffff',
+                    strokeThickness: 6,
+                    align: 'center',
+                    fontStyle: 'bold'
+                });
+                titleText.setOrigin(0.5);
+                
+                this.tweens.add({
+                    targets: titleText,
+                    scale: { from: 1, to: 1.05 },
+                    duration: 1500,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+                
+                const subtitle = this.add.text(width / 2, height * 0.32, 'Trap the Kitty Before It Escapes!', {
+                    fontFamily: 'Arial, sans-serif',
+                    fontSize: '18px',
+                    color: '#636e72',
+                    fontStyle: 'bold'
+                });
+                subtitle.setOrigin(0.5);
+                
+                this.tweens.add({
+                    targets: subtitle,
+                    alpha: { from: 0.7, to: 1 },
+                    duration: 2000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+
+            createCatAnimation(width, height) {
+                const catEmoji = this.add.text(width / 2, height * 0.45, '🐱', {
+                    fontSize: '80px'
+                });
+                catEmoji.setOrigin(0.5);
+                
+                this.tweens.add({
+                    targets: catEmoji,
+                    y: height * 0.45 - 20,
+                    duration: 800,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Bounce.easeOut'
+                });
+                
+                this.tweens.add({
+                    targets: catEmoji,
+                    angle: { from: -10, to: 10 },
+                    duration: 1000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+
+            createPlayButton(width, height) {
+                const buttonY = height * 0.62;
+                
+                const buttonBg = this.add.graphics();
+                buttonBg.fillStyle(0x6c5ce7, 1);
+                buttonBg.fillRoundedRect(-100, -25, 200, 50, 25);
+                
+                const buttonText = this.add.text(0, 0, 'PLAY', {
+                    fontFamily: 'Arial Black, sans-serif',
+                    fontSize: '28px',
+                    color: '#ffffff',
+                    fontStyle: 'bold'
+                });
+                buttonText.setOrigin(0.5);
+                
+                const playButton = this.add.container(width / 2, buttonY, [buttonBg, buttonText]);
+                playButton.setSize(200, 50);
+                playButton.setInteractive(new Phaser.Geom.Rectangle(-100, -25, 200, 50), Phaser.Geom.Rectangle.Contains);
+                
+                playButton.on('pointerover', () => {
+                    this.tweens.add({
+                        targets: playButton,
+                        scale: 1.1,
+                        duration: 200,
+                        ease: 'Back.easeOut'
+                    });
+                    buttonBg.clear();
+                    buttonBg.fillStyle(0x5849be, 1);
+                    buttonBg.fillRoundedRect(-100, -25, 200, 50, 25);
+                });
+                
+                playButton.on('pointerout', () => {
+                    this.tweens.add({
+                        targets: playButton,
+                        scale: 1,
+                        duration: 200,
+                        ease: 'Back.easeIn'
+                    });
+                    buttonBg.clear();
+                    buttonBg.fillStyle(0x6c5ce7, 1);
+                    buttonBg.fillRoundedRect(-100, -25, 200, 50, 25);
+                });
+                
+                playButton.on('pointerdown', () => {
+                    this.tweens.add({
+                        targets: playButton,
+                        scale: 0.95,
+                        duration: 100,
+                        yoyo: true,
+                        onComplete: () => {
+                            this.cameras.main.fadeOut(300, 0, 0, 0);
+                            this.time.delayedCall(300, () => {
+                                this.scene.start('MainScene');
+                            });
+                        }
+                    });
+                });
+                
+                this.tweens.add({
+                    targets: playButton,
+                    scale: { from: 1, to: 1.05 },
+                    duration: 1000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+
+            createHowToPlayButton(width, height) {
+                const buttonY = height * 0.74;
+                
+                const buttonBg = this.add.graphics();
+                buttonBg.lineStyle(3, 0x6c5ce7, 1);
+                buttonBg.strokeRoundedRect(-120, -22, 240, 44, 22);
+                
+                const buttonText = this.add.text(0, 0, 'How to Play', {
+                    fontFamily: 'Arial, sans-serif',
+                    fontSize: '22px',
+                    color: '#6c5ce7',
+                    fontStyle: 'bold'
+                });
+                buttonText.setOrigin(0.5);
+                
+                const howToPlayButton = this.add.container(width / 2, buttonY, [buttonBg, buttonText]);
+                howToPlayButton.setSize(240, 44);
+                howToPlayButton.setInteractive(new Phaser.Geom.Rectangle(-120, -22, 240, 44), Phaser.Geom.Rectangle.Contains);
+                
+                howToPlayButton.on('pointerover', () => {
+                    this.tweens.add({
+                        targets: howToPlayButton,
+                        scale: 1.05,
+                        duration: 200,
+                        ease: 'Back.easeOut'
+                    });
+                    buttonBg.clear();
+                    buttonBg.fillStyle(0x6c5ce7, 0.1);
+                    buttonBg.fillRoundedRect(-120, -22, 240, 44, 22);
+                    buttonBg.lineStyle(3, 0x6c5ce7, 1);
+                    buttonBg.strokeRoundedRect(-120, -22, 240, 44, 22);
+                });
+                
+                howToPlayButton.on('pointerout', () => {
+                    this.tweens.add({
+                        targets: howToPlayButton,
+                        scale: 1,
+                        duration: 200,
+                        ease: 'Back.easeIn'
+                    });
+                    buttonBg.clear();
+                    buttonBg.lineStyle(3, 0x6c5ce7, 1);
+                    buttonBg.strokeRoundedRect(-120, -22, 240, 44, 22);
+                });
+                
+                howToPlayButton.on('pointerdown', () => {
+                    this.tweens.add({
+                        targets: howToPlayButton,
+                        scale: 0.95,
+                        duration: 100,
+                        yoyo: true,
+                        onComplete: () => {
+                            this.cameras.main.fadeOut(200, 0, 0, 0);
+                            this.time.delayedCall(200, () => {
+                                this.scene.start('HowToPlayScene');
+                            });
+                        }
+                    });
+                });
+            }
+
+            createFooter(width, height) {
+                const footer = this.add.text(width / 2, height * 0.9, 'Strategy Puzzle Game', {
+                    fontFamily: 'Arial, sans-serif',
+                    fontSize: '14px',
+                    color: '#b2bec3',
+                    fontStyle: 'bold'
+                });
+                footer.setOrigin(0.5);
+            }
+        }
+
+        // HowToPlayScene - Instructions screen
+        class HowToPlayScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'HowToPlayScene' });
+            }
+
+            create() {
+                const width = this.cameras.main.width;
+                const height = this.cameras.main.height;
+                
+                // Background
+                const bg = this.add.graphics();
+                bg.fillStyle(0xffffff, 1);
+                bg.fillRect(0, 0, width, height);
+                
+                // Title
+                const title = this.add.text(width / 2, 50, 'How to Play', {
+                    fontFamily: 'Arial Black, sans-serif',
+                    fontSize: '42px',
+                    color: '#6c5ce7',
+                    fontStyle: 'bold'
+                });
+                title.setOrigin(0.5);
+                
+                // Instructions panel
+                const panelWidth = width * 0.85;
+                const panelHeight = height * 0.62;
+                const panelX = (width - panelWidth) / 2;
+                const panelY = height * 0.16;
+                
+                const panelBg = this.add.graphics();
+                panelBg.fillStyle(0xf8f9fa, 1);
+                panelBg.fillRoundedRect(panelX, panelY, panelWidth, panelHeight, 20);
+                panelBg.lineStyle(3, 0x6c5ce7, 0.3);
+                panelBg.strokeRoundedRect(panelX, panelY, panelWidth, panelHeight, 20);
+                
+                // Instructions
+                const sections = [
+                    {
+                        icon: '🎯',
+                        title: 'Objective',
+                        content: 'Trap the cat before it escapes to the edge!'
+                    },
+                    {
+                        icon: '🎮',
+                        title: 'How to Play',
+                        points: [
+                            'Click on empty dots to block the cat\'s path',
+                            'The cat moves after each of your clicks',
+                            'Surround the cat completely to win',
+                            'If the cat reaches the edge, you lose'
+                        ]
+                    },
+                    {
+                        icon: '💡',
+                        title: 'Tips',
+                        points: [
+                            'Plan your moves carefully',
+                            'Try to corner the cat early',
+                            'Block paths strategically'
+                        ]
+                    }
+                ];
+                
+                let yOffset = panelY + 30;
+                let animationDelay = 0;
+                
+                sections.forEach((section) => {
+                    // Section header
+                    const header = this.add.text(width / 2, yOffset, `${section.icon} ${section.title}`, {
+                        fontFamily: 'Arial Black, sans-serif',
+                        fontSize: '22px',
+                        color: '#6c5ce7',
+                        fontStyle: 'bold'
+                    });
+                    header.setOrigin(0.5, 0);
+                    header.setAlpha(0);
+                    this.tweens.add({
+                        targets: header,
+                        alpha: 1,
+                        duration: 300,
+                        delay: animationDelay,
+                        ease: 'Power2'
+                    });
+                    animationDelay += 100;
+                    
+                    yOffset += 35;
+                    
+                    // Content or bullet points
+                    if (section.content) {
+                        const content = this.add.text(width / 2, yOffset, section.content, {
+                            fontFamily: 'Arial, sans-serif',
+                            fontSize: '17px',
+                            color: '#2d3436',
+                            align: 'center',
+                            wordWrap: { width: panelWidth * 0.85 }
+                        });
+                        content.setOrigin(0.5, 0);
+                        content.setAlpha(0);
+                        this.tweens.add({
+                            targets: content,
+                            alpha: 1,
+                            duration: 300,
+                            delay: animationDelay,
+                            ease: 'Power2'
+                        });
+                        animationDelay += 80;
+                        yOffset += content.height + 20;
+                    } else if (section.points) {
+                        section.points.forEach((point) => {
+                            const bullet = this.add.text(panelX + 40, yOffset, '•', {
+                                fontFamily: 'Arial, sans-serif',
+                                fontSize: '20px',
+                                color: '#6c5ce7',
+                                fontStyle: 'bold'
+                            });
+                            bullet.setOrigin(0, 0);
+                            bullet.setAlpha(0);
+                            
+                            const pointText = this.add.text(panelX + 65, yOffset, point, {
+                                fontFamily: 'Arial, sans-serif',
+                                fontSize: '16px',
+                                color: '#2d3436',
+                                wordWrap: { width: panelWidth - 90 }
+                            });
+                            pointText.setOrigin(0, 0);
+                            pointText.setAlpha(0);
+                            
+                            this.tweens.add({
+                                targets: [bullet, pointText],
+                                alpha: 1,
+                                duration: 300,
+                                delay: animationDelay,
+                                ease: 'Power2'
+                            });
+                            animationDelay += 80;
+                            
+                            yOffset += Math.max(bullet.height, pointText.height) + 12;
+                        });
+                        yOffset += 15;
+                    }
+                });
+                
+                // Back button
+                this.createBackButton(width, height);
+                
+                // Fade in
+                this.cameras.main.fadeIn(200, 0, 0, 0);
+            }
+
+            createBackButton(width, height) {
+                const buttonY = height * 0.88;
+                
+                const buttonBg = this.add.graphics();
+                buttonBg.fillStyle(0x6c5ce7, 1);
+                buttonBg.fillRoundedRect(-80, -22, 160, 44, 22);
+                
+                const buttonText = this.add.text(0, 0, '← Back', {
+                    fontFamily: 'Arial, sans-serif',
+                    fontSize: '20px',
+                    color: '#ffffff',
+                    fontStyle: 'bold'
+                });
+                buttonText.setOrigin(0.5);
+                
+                const backButton = this.add.container(width / 2, buttonY, [buttonBg, buttonText]);
+                backButton.setSize(160, 44);
+                backButton.setInteractive(new Phaser.Geom.Rectangle(-80, -22, 160, 44), Phaser.Geom.Rectangle.Contains);
+                
+                backButton.on('pointerover', () => {
+                    this.tweens.add({
+                        targets: backButton,
+                        scale: 1.05,
+                        duration: 200,
+                        ease: 'Back.easeOut'
+                    });
+                    buttonBg.clear();
+                    buttonBg.fillStyle(0x5849be, 1);
+                    buttonBg.fillRoundedRect(-80, -22, 160, 44, 22);
+                });
+                
+                backButton.on('pointerout', () => {
+                    this.tweens.add({
+                        targets: backButton,
+                        scale: 1,
+                        duration: 200,
+                        ease: 'Back.easeIn'
+                    });
+                    buttonBg.clear();
+                    buttonBg.fillStyle(0x6c5ce7, 1);
+                    buttonBg.fillRoundedRect(-80, -22, 160, 44, 22);
+                });
+                
+                backButton.on('pointerdown', () => {
+                    this.tweens.add({
+                        targets: backButton,
+                        scale: 0.95,
+                        duration: 100,
+                        yoyo: true,
+                        onComplete: () => {
+                            this.cameras.main.fadeOut(200, 0, 0, 0);
+                            this.time.delayedCall(200, () => {
+                                this.scene.start('HomeScene');
+                            });
+                        }
+                    });
+                });
+            }
+        }
+
+        // MainScene - Simplified grid game
+        class MainScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'MainScene' });
+                this.gridSize = 9;
+                this.cellSize = 50;
+                this.blocks = [];
+                this.catPos = { x: 4, y: 4 };
+                this.gameOver = false;
+            }
+
+            create() {
+                const width = this.cameras.main.width;
+                const height = this.cameras.main.height;
+                
+                // Background
+                const bg = this.add.graphics();
+                bg.fillStyle(0xf0f0f0, 1);
+                bg.fillRect(0, 0, width, height);
+                
+                // Title
+                const title = this.add.text(width / 2, 30, 'Catch The Cat', {
+                    fontFamily: 'Arial Black, sans-serif',
+                    fontSize: '28px',
+                    color: '#6c5ce7',
+                    fontStyle: 'bold'
+                });
+                title.setOrigin(0.5);
+                
+                // Status text
+                this.statusText = this.add.text(width / 2, 70, 'Click dots to block the cat!', {
+                    fontFamily: 'Arial, sans-serif',
+                    fontSize: '18px',
+                    color: '#333333'
+                });
+                this.statusText.setOrigin(0.5);
+                
+                // Initialize grid
+                this.initializeGrid(width, height);
+                
+                // Create back button
+                this.createBackButton(width, height);
+                
+                // Fade in
+                this.cameras.main.fadeIn(200, 0, 0, 0);
+            }
+
+            initializeGrid(width, height) {
+                const startX = (width - this.gridSize * this.cellSize) / 2;
+                const startY = (height - this.gridSize * this.cellSize) / 2 + 30;
+                
+                for (let y = 0; y < this.gridSize; y++) {
+                    this.blocks[y] = [];
+                    for (let x = 0; x < this.gridSize; x++) {
+                        const posX = startX + x * this.cellSize + this.cellSize / 2;
+                        const posY = startY + y * this.cellSize + this.cellSize / 2;
+                        
+                        // Create empty cell
+                        const cell = this.add.circle(posX, posY, 15, 0xcccccc);
+                        cell.setInteractive();
+                        cell.setData('gridX', x);
+                        cell.setData('gridY', y);
+                        cell.setData('isBlocked', false);
+                        
+                        // Add some random initial blocks
+                        if (Math.random() < 0.1 && !(x === this.catPos.x && y === this.catPos.y)) {
+                            cell.setFillStyle(0x333333);
+                            cell.setData('isBlocked', true);
+                        }
+                        
+                        cell.on('pointerover', () => {
+                            if (!cell.getData('isBlocked') && !this.gameOver) {
+                                cell.setFillStyle(0xaaaaaa);
+                            }
+                        });
+                        
+                        cell.on('pointerout', () => {
+                            if (!cell.getData('isBlocked') && !this.gameOver) {
+                                cell.setFillStyle(0xcccccc);
+                            }
+                        });
+                        
+                        cell.on('pointerdown', () => {
+                            if (!cell.getData('isBlocked') && !this.gameOver && 
+                                !(x === this.catPos.x && y === this.catPos.y)) {
+                                // Block this cell
+                                cell.setFillStyle(0x333333);
+                                cell.setData('isBlocked', true);
+                                
+                                // Move cat
+                                this.moveCat();
+                            }
+                        });
+                        
+                        this.blocks[y][x] = cell;
+                    }
+                }
+                
+                // Create cat
+                const catStartX = (width - this.gridSize * this.cellSize) / 2;
+                const catStartY = (height - this.gridSize * this.cellSize) / 2 + 30;
+                const catX = catStartX + this.catPos.x * this.cellSize + this.cellSize / 2;
+                const catY = catStartY + this.catPos.y * this.cellSize + this.cellSize / 2;
+                
+                this.cat = this.add.text(catX, catY, '🐱', {
+                    fontSize: '40px'
+                });
+                this.cat.setOrigin(0.5);
+            }
+
+            moveCat() {
+                // Simple AI: move towards nearest edge
+                const directions = [
+                    { dx: 0, dy: -1 }, { dx: 0, dy: 1 },
+                    { dx: -1, dy: 0 }, { dx: 1, dy: 0 }
+                ];
+                
+                let bestMove = null;
+                let bestDistance = Infinity;
+                
+                for (const dir of directions) {
+                    const newX = this.catPos.x + dir.dx;
+                    const newY = this.catPos.y + dir.dy;
+                    
+                    // Check if move is valid
+                    if (newX >= 0 && newX < this.gridSize && 
+                        newY >= 0 && newY < this.gridSize &&
+                        !this.blocks[newY][newX].getData('isBlocked')) {
+                        
+                        // Calculate distance to nearest edge
+                        const distToEdge = Math.min(newX, newY, 
+                            this.gridSize - 1 - newX, 
+                            this.gridSize - 1 - newY);
+                        
+                        if (distToEdge < bestDistance) {
+                            bestDistance = distToEdge;
+                            bestMove = { x: newX, y: newY };
+                        }
+                    }
+                }
+                
+                if (bestMove) {
+                    this.catPos = bestMove;
+                    this.updateCatPosition();
+                    
+                    // Check if cat reached edge
+                    if (this.catPos.x === 0 || this.catPos.x === this.gridSize - 1 ||
+                        this.catPos.y === 0 || this.catPos.y === this.gridSize - 1) {
+                        this.endGame(false);
+                    }
+                } else {
+                    // Cat is trapped - player wins!
+                    this.endGame(true);
+                }
+            }
+
+            updateCatPosition() {
+                const width = this.cameras.main.width;
+                const height = this.cameras.main.height;
+                const startX = (width - this.gridSize * this.cellSize) / 2;
+                const startY = (height - this.gridSize * this.cellSize) / 2 + 30;
+                
+                const catX = startX + this.catPos.x * this.cellSize + this.cellSize / 2;
+                const catY = startY + this.catPos.y * this.cellSize + this.cellSize / 2;
+                
+                this.tweens.add({
+                    targets: this.cat,
+                    x: catX,
+                    y: catY,
+                    duration: 300,
+                    ease: 'Back.easeOut'
+                });
+            }
+
+            endGame(won) {
+                this.gameOver = true;
+                
+                if (won) {
+                    this.statusText.setText('🎉 You Win! Cat is trapped!');
+                    this.statusText.setColor('#00b894');
+                } else {
+                    this.statusText.setText('😿 Cat Escaped! Try Again');
+                    this.statusText.setColor('#d63031');
+                }
+                
+                // Show restart button
+                this.time.delayedCall(1000, () => {
+                    const width = this.cameras.main.width;
+                    const height = this.cameras.main.height;
+                    
+                    const restartBtn = this.add.text(width / 2, height - 100, '🔄 Restart', {
+                        fontFamily: 'Arial, sans-serif',
+                        fontSize: '24px',
+                        color: '#6c5ce7',
+                        fontStyle: 'bold',
+                        backgroundColor: '#ffffff',
+                        padding: { x: 20, y: 10 }
+                    });
+                    restartBtn.setOrigin(0.5);
+                    restartBtn.setInteractive();
+                    
+                    restartBtn.on('pointerover', () => {
+                        restartBtn.setScale(1.1);
+                    });
+                    
+                    restartBtn.on('pointerout', () => {
+                        restartBtn.setScale(1);
+                    });
+                    
+                    restartBtn.on('pointerdown', () => {
+                        this.scene.restart();
+                    });
+                });
+            }
+
+            createBackButton(width, height) {
+                const backBtn = this.add.text(20, 20, '← Menu', {
+                    fontFamily: 'Arial, sans-serif',
+                    fontSize: '18px',
+                    color: '#6c5ce7',
+                    fontStyle: 'bold'
+                });
+                backBtn.setInteractive();
+                
+                backBtn.on('pointerover', () => {
+                    backBtn.setColor('#5849be');
+                });
+                
+                backBtn.on('pointerout', () => {
+                    backBtn.setColor('#6c5ce7');
+                });
+                
+                backBtn.on('pointerdown', () => {
+                    this.cameras.main.fadeOut(200, 0, 0, 0);
+                    this.time.delayedCall(200, () => {
+                        this.scene.start('HomeScene');
+                    });
+                });
+            }
+        }
+
+        // Game configuration
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#ffffff',
+            scene: [HomeScene, HowToPlayScene, MainScene]
+        };
+
+        // Initialize game
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
