@@ -2,101 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Catch The Cat - A fun puzzle game where you trap a clever cat before it escapes!">
-    <meta name="keywords" content="catch the cat, puzzle game, strategy game, phaser game">
-    <meta name="author" content="SanwikSagarPW">
-    
-    <!-- Open Graph Meta Tags for Social Sharing -->
-    <meta property="og:title" content="Catch The Cat - Puzzle Game">
-    <meta property="og:description" content="A fun puzzle game where you trap a clever cat before it escapes!">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://sanwiksagarpw.github.io/CatchMeIfYouCan/">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Catch The Cat - Puzzle Game">
-    <meta name="twitter:description" content="A fun puzzle game where you trap a clever cat before it escapes!">
-    
-    <title>Catch The Cat - Puzzle Game</title>
-    
+    <title>Catch The Cat</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🐱</text></svg>">
     <style>
         * {
             padding: 0;
-            margin: 0;
-            box-sizing: border-box;
+            margin: 0
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
+            background-color: #eeeeee;
         }
 
         #catch-the-cat {
             width: 100%;
-            max-width: 600px;
+            margin-top: 32px;
             text-align: center;
-            padding: 20px;
-        }
-        
-        /* Loading indicator */
-        .loading {
-            color: white;
-            font-size: 1.2rem;
-            font-weight: 600;
-            text-align: center;
-            padding: 20px;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        /* Footer */
-        .footer {
-            position: fixed;
-            bottom: 10px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.85rem;
-            width: 100%;
-        }
-        
-        .footer a {
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .footer a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="loading" id="loading">Loading Game...</div>
-    
-    <script src="./js-analytics-bridge/analytics-bridge.js"></script>
-    <script src="./phaser.min.js"></script>
-    <script src="./catch-the-cat.js"></script>
-    
+    <script src="js-analytics-bridge/analytics-bridge.js"></script>
+    <script src="phaser.min.js"></script>
+    <script src="catch-the-cat.js"></script>
+    <div id="catch-the-cat"></div>
     <script>
-      // Hide loading indicator once game starts
-      setTimeout(function() {
-        var loading = document.getElementById('loading');
-        if (loading) loading.style.display = 'none';
-      }, 1000);
-      
-      // Note: The game is automatically initialized by catch-the-cat.js
-      // No need to create a new instance here
+      window.game = new CatchTheCatGame({
+        w: 11,
+        h: 11,
+        r: 20,
+        initialWallCount: 8,
+        backgroundColor: 0xffffff,
+        parent: 'catch-the-cat',
+        statusBarAlign: 'center',
+        credit: ''
+      });
     </script>
 </body>
 </html>
