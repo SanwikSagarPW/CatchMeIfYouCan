@@ -4,3 +4,7 @@
 npm-debug.log*
 .vscode/
 .idea/
+node_modules - Copy/
+.vscode - Copy/
+assets - Copy/
+dist - Copy/
